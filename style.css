@@ -1,0 +1,98 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 2rem;
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+textarea {
+  display: none;
+}
+
+button {
+  margin-right: 10px;
+  margin-top: 10px;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #007bff;
+  border: none;
+  color: white;
+  border-radius: 4px;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.section {
+  margin-top: 2rem;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00aced;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #00aced;
+  padding-bottom: 0.3rem;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: left;
+}
+
+.card {
+  background-color: #1b2a38;
+  flex: 0 0 260px;
+  max-width: 260px;
+  border-radius: 12px; /* <-- questa è fondamentale */
+  overflow: hidden;    /* <-- serve per "tagliare" gli angoli anche dei figli */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.album-title {
+  background-color: #2980b9;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 1rem;
+  text-align: center;
+  /* nessun border-radius qui */
+}
+
+.album-info {
+  background-color: #1b2a38;
+  padding: 1rem;
+  color: #cfd9e0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+  text-align: center;
+  /* nessun border-radius qui */
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+input[type="text"] {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: none;
+  min-width: 200px;
+  background-color: #2e2e2e;
+  color: white;
+  outline: none;
+  border: 1px solid #444;
+}
