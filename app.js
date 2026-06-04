@@ -6,6 +6,7 @@
     window.DISCOTECA_CSV,
     "Dischi - Elenco Dischi(1).csv",
     "Dischi - Elenco Dischi.csv",
+    "Dischi.csv",
     "dischi.csv",
     "catalogo.csv",
     "data.csv"
