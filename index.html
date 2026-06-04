@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Catalogo dischi personale con dati caricati da CSV." />
+  <title>La mia discoteca</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    window.DISCOTECA_CSV = "Dischi - Elenco Dischi(1).csv";
+  </script>
+  <script src="app.js" defer></script>
+</head>
+<body class="no-js">
+  <a class="skip-link" href="#catalogo">Vai al catalogo</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Pannello laterale">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">LP</div>
+        <div>
+          <strong>Discoteca</strong>
+          <span>Archivio vinili</span>
+        </div>
+      </div>
+
+      <button id="randomButton" class="random-button" type="button" disabled>
+        <span class="random-kicker">Random picker</span>
+        <span class="random-main">
+          <span class="random-icon" aria-hidden="true">?</span>
+          <span>What to listen?</span>
+        </span>
+        <span id="randomHint" class="random-copy">Pesca un album casuale dai risultati visibili.</span>
+      </button>
+
+      <div class="sidebar-card">
+        <p class="eyebrow">CSV collegato</p>
+        <p id="sourceName" class="source-name">Caricamento...</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <section id="statistiche" class="stats-grid" aria-label="Statistiche catalogo">
+        <article class="stat-card">
+          <span class="stat-label">Album</span>
+          <strong id="statAlbums">--</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Artisti</span>
+          <strong id="statArtists">--</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Dischi fisici</span>
+          <strong id="statDiscs">--</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">Anni coperti</span>
+          <strong id="statYears">--</strong>
+        </article>
+      </section>
+
+      <section class="toolbar" aria-label="Filtri catalogo">
+        <div class="search-wrap">
+          <label class="sr-only" for="searchInput">Cerca per titolo, artista o dettaglio</label>
+          <span aria-hidden="true">Search</span>
+          <input id="searchInput" type="search" placeholder="Cerca titolo, artista, formato, note..." autocomplete="off" />
+        </div>
+
+        <label>
+          <span class="sr-only">Formato</span>
+          <select id="formatFilter">
+            <option value="all">Tutti i formati</option>
+          </select>
+        </label>
+
+        <label>
+          <span class="sr-only">Sezione</span>
+          <select id="sectionFilter">
+            <option value="all">Tutte le sezioni</option>
+          </select>
+        </label>
+
+        <label>
+          <span class="sr-only">Decennio</span>
+          <select id="decadeFilter">
+            <option value="all">Tutti gli anni</option>
+          </select>
+        </label>
+
+        <label>
+          <span class="sr-only">Separazione</span>
+          <select id="groupSelect">
+            <option value="section">Sezioni speciali</option>
+            <option value="none">Nessuna separazione</option>
+            <option value="artist">Separa per artista</option>
+            <option value="decade">Separa per decade</option>
+            <option value="format">Separa per formato</option>
+            <option value="country">Separa per paese</option>
+          </select>
+        </label>
+
+        <label>
+          <span class="sr-only">Ordinamento</span>
+          <select id="sortSelect">
+            <option value="artist-az">Artista A-Z</option>
+            <option value="title-az">Titolo A-Z</option>
+            <option value="year-desc">Anno pi&ugrave; recente</option>
+            <option value="year-asc">Anno pi&ugrave; vecchio</option>
+          </select>
+        </label>
+
+        <button id="resetFilters" class="ghost-button" type="button">Reset</button>
+      </section>
+
+      <section class="catalog-heading" id="catalogo">
+        <div>
+          <p class="eyebrow">Playlist salvate</p>
+          <h1>Catalogo dischi</h1>
+        </div>
+        <p id="resultCount" class="result-count">-- risultati</p>
+      </section>
+
+      <section id="statusBox" class="status-box" role="status" aria-live="polite">
+        Carico il catalogo dal CSV...
+      </section>
+
+      <section id="manualCsvBox" class="manual-csv-box" hidden>
+        <div>
+          <h2>Non riesco a leggere il CSV automaticamente</h2>
+          <p>
+            Alcuni browser bloccano il caricamento dei file locali aperti con doppio clic.
+            Puoi selezionare manualmente il CSV oppure avviare un piccolo server locale.
+          </p>
+        </div>
+        <label class="file-picker">
+          Scegli CSV
+          <input id="csvFileInput" type="file" accept=".csv,text/csv" />
+        </label>
+      </section>
+
+      <section id="grid" class="album-grid" aria-label="Dischi"></section>
+
+      <section id="emptyState" class="empty-state" hidden>
+        <div class="empty-icon" aria-hidden="true">LP</div>
+        <h2>Nessun disco trovato</h2>
+        <p>Prova a cambiare ricerca o filtri.</p>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="detailDialog" class="detail-dialog" aria-labelledby="dialogTitle">
+    <div class="dialog-inner">
+      <button id="closeDialog" class="close-button" type="button" aria-label="Chiudi dettagli">&times;</button>
+      <div id="dialogContent"></div>
+    </div>
+  </dialog>
+</body>
+</html>
