@@ -4,10 +4,21 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Catalogo dischi personale con dati caricati da CSV." />
-  <title>La mia discoteca</title>
+  <title>Plastic Pizzas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("discoteca-theme");
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = saved || (prefersDark ? "dark" : "light");
+      } catch (_) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
   <link rel="stylesheet" href="style.css" />
   <script>
     window.DISCOTECA_CSV = "Dischi.csv";
@@ -21,11 +32,76 @@
     <aside class="sidebar" aria-label="Pannello laterale">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">LP</div>
-        <div>
-          <strong>Discoteca</strong>
+        <div class="brand-copy">
+          <strong>Plastic Pizzas</strong>
           <span>Archivio vinili</span>
         </div>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambia tema" aria-pressed="false">
+          <span class="theme-toggle-label">Tema</span>
+          <span class="theme-toggle-dot" aria-hidden="true"></span>
+        </button>
       </div>
+
+      <section class="toolbar side-toolbar" aria-label="Filtri catalogo">
+        <div class="side-toolbar-title">
+          <p class="eyebrow">Gestione catalogo</p>
+          <strong>Filtri</strong>
+        </div>
+
+        <div class="search-wrap">
+          <label class="sr-only" for="searchInput">Cerca per titolo, artista o dettaglio</label>
+          <span aria-hidden="true">Search</span>
+          <input id="searchInput" type="search" placeholder="Titolo, artista, formato..." autocomplete="off" />
+        </div>
+
+        <div class="filter-grid">
+          <label>
+            <span>Formato</span>
+            <select id="formatFilter">
+              <option value="all">Tutti</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Sezione</span>
+            <select id="sectionFilter">
+              <option value="all">Tutte</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Decennio</span>
+            <select id="decadeFilter">
+              <option value="all">Tutti</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Vista</span>
+            <select id="groupSelect">
+              <option value="catalog">Catalogo compatto</option>
+              <option value="section">Sezioni speciali</option>
+              <option value="none">Nessuna separazione</option>
+              <option value="artist">Separa per artista</option>
+              <option value="decade">Separa per decade</option>
+              <option value="format">Separa per formato</option>
+              <option value="country">Separa per paese</option>
+            </select>
+          </label>
+
+          <label class="filter-wide">
+            <span>Ordine</span>
+            <select id="sortSelect">
+              <option value="artist-az">Artista A-Z / anno recente</option>
+              <option value="title-az">Titolo A-Z</option>
+              <option value="year-desc">Anno pi&ugrave; recente</option>
+              <option value="year-asc">Anno pi&ugrave; vecchio</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="resetFilters" class="ghost-button" type="button">Reset filtri</button>
+      </section>
 
       <button id="randomButton" class="random-button" type="button" disabled>
         <span class="random-kicker">Random picker</span>
@@ -41,6 +117,8 @@
         <p id="sourceName" class="source-name">Caricamento...</p>
       </div>
     </aside>
+
+    <nav id="alphabetNav" class="alphabet-nav" aria-label="Navigazione alfabetica"></nav>
 
     <main class="main-content">
       <section id="statistiche" class="stats-grid" aria-label="Statistiche catalogo">
@@ -62,64 +140,8 @@
         </article>
       </section>
 
-      <section class="toolbar" aria-label="Filtri catalogo">
-        <div class="search-wrap">
-          <label class="sr-only" for="searchInput">Cerca per titolo, artista o dettaglio</label>
-          <span aria-hidden="true">Search</span>
-          <input id="searchInput" type="search" placeholder="Cerca titolo, artista, formato, note..." autocomplete="off" />
-        </div>
-
-        <label>
-          <span class="sr-only">Formato</span>
-          <select id="formatFilter">
-            <option value="all">Tutti i formati</option>
-          </select>
-        </label>
-
-        <label>
-          <span class="sr-only">Sezione</span>
-          <select id="sectionFilter">
-            <option value="all">Tutte le sezioni</option>
-          </select>
-        </label>
-
-        <label>
-          <span class="sr-only">Decennio</span>
-          <select id="decadeFilter">
-            <option value="all">Tutti gli anni</option>
-          </select>
-        </label>
-
-        <label>
-          <span class="sr-only">Separazione</span>
-          <select id="groupSelect">
-            <option value="section">Sezioni speciali</option>
-            <option value="none">Nessuna separazione</option>
-            <option value="artist">Separa per artista</option>
-            <option value="decade">Separa per decade</option>
-            <option value="format">Separa per formato</option>
-            <option value="country">Separa per paese</option>
-          </select>
-        </label>
-
-        <label>
-          <span class="sr-only">Ordinamento</span>
-          <select id="sortSelect">
-            <option value="artist-az">Artista A-Z</option>
-            <option value="title-az">Titolo A-Z</option>
-            <option value="year-desc">Anno pi&ugrave; recente</option>
-            <option value="year-asc">Anno pi&ugrave; vecchio</option>
-          </select>
-        </label>
-
-        <button id="resetFilters" class="ghost-button" type="button">Reset</button>
-      </section>
-
       <section class="catalog-heading" id="catalogo">
-        <div>
-          <p class="eyebrow">Playlist salvate</p>
-          <h1>Catalogo dischi</h1>
-        </div>
+        <h1 class="sr-only">Catalogo dischi</h1>
         <p id="resultCount" class="result-count">-- risultati</p>
       </section>
 
