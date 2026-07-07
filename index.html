@@ -3,38 +3,36 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Catalogo dischi personale con dati caricati da CSV." />
-  <title>Plastic Pizzas</title>
+  <meta name="description" content="Plastic Pizzas: archivio personale di vinili, LP, OST e compilation, navigabile da CSV con filtri e ricerca." />
+  <meta name="theme-color" content="#fff0d3" />
+  <title>Plastic Pizzas · Retro Record Archive</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;700&family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script>
     (() => {
       try {
         const saved = localStorage.getItem("discoteca-theme");
-        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.dataset.theme = saved || (prefersDark ? "dark" : "light");
+        document.documentElement.dataset.theme = saved || "light";
       } catch (_) {
         document.documentElement.dataset.theme = "light";
       }
     })();
   </script>
   <link rel="stylesheet" href="style.css" />
-  <script>
-    window.DISCOTECA_CSV = "Dischi.csv";
-  </script>
+  <script>window.DISCOTECA_CSV = "Dischi.csv";</script>
   <script src="app.js" defer></script>
 </head>
 <body class="no-js">
+  <div id="pageTop" class="page-top-anchor" aria-hidden="true"></div>
   <a class="skip-link" href="#catalogo">Vai al catalogo</a>
 
   <div class="app-shell">
     <aside class="sidebar" aria-label="Pannello laterale">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">LP</div>
+        <div class="brand-mark" aria-hidden="true">PP</div>
         <div class="brand-copy">
-          <strong>Plastic Pizzas</strong>
-          <span>Archivio vinili</span>
+          <a class="brand-home" href="#pageTop" aria-label="Torna in cima">Plastic Pizzas</a>
         </div>
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Cambia tema" aria-pressed="false">
           <span class="theme-toggle-label">Tema</span>
@@ -42,46 +40,29 @@
         </button>
       </div>
 
+
       <section class="toolbar side-toolbar" aria-label="Filtri catalogo">
         <div class="side-toolbar-title">
-          <p class="eyebrow">Gestione catalogo</p>
-          <strong>Filtri</strong>
+          <p class="eyebrow">Console filtri</p>
+          <strong>Search deck</strong>
         </div>
 
         <div class="search-wrap">
           <label class="sr-only" for="searchInput">Cerca per titolo, artista o dettaglio</label>
-          <span aria-hidden="true">Search</span>
+          <span aria-hidden="true">検索</span>
           <input id="searchInput" type="search" placeholder="Titolo, artista, formato..." autocomplete="off" />
         </div>
 
         <div class="filter-grid">
           <label>
-            <span>Formato</span>
-            <select id="formatFilter">
-              <option value="all">Tutti</option>
-            </select>
-          </label>
-
-          <label>
-            <span>Sezione</span>
-            <select id="sectionFilter">
-              <option value="all">Tutte</option>
-            </select>
-          </label>
-
-          <label>
             <span>Decennio</span>
-            <select id="decadeFilter">
-              <option value="all">Tutti</option>
-            </select>
+            <select id="decadeFilter"><option value="all">Tutti</option></select>
           </label>
 
           <label>
             <span>Vista</span>
             <select id="groupSelect">
               <option value="catalog">Catalogo compatto</option>
-              <option value="section">Sezioni speciali</option>
-              <option value="none">Nessuna separazione</option>
               <option value="artist">Separa per artista</option>
               <option value="decade">Separa per decade</option>
               <option value="format">Separa per formato</option>
@@ -105,10 +86,7 @@
 
       <button id="randomButton" class="random-button" type="button" disabled>
         <span class="random-kicker">Random picker</span>
-        <span class="random-main">
-          <span class="random-icon" aria-hidden="true">?</span>
-          <span>What to listen?</span>
-        </span>
+        <span class="random-main"><span class="random-icon" aria-hidden="true">▶</span><span>What to listen?</span></span>
         <span id="randomHint" class="random-copy">Pesca un album casuale dai risultati visibili.</span>
       </button>
 
@@ -121,57 +99,51 @@
     <nav id="alphabetNav" class="alphabet-nav" aria-label="Navigazione alfabetica"></nav>
 
     <main class="main-content">
+      <section class="hero" aria-label="Intro archivio">
+        <div class="hero-copy">
+          <h1>Plastic<br />Pizzas</h1>
+        </div>
+        <div class="hero-object" aria-hidden="true">
+          <span class="hero-stripe"></span>
+          <span class="hero-disc"></span>
+          <span class="hero-label">SUPER<br />CATALOG</span>
+          <span class="hero-jp">音楽</span>
+        </div>
+      </section>
+
       <section id="statistiche" class="stats-grid" aria-label="Statistiche catalogo">
-        <article class="stat-card">
-          <span class="stat-label">Album</span>
-          <strong id="statAlbums">--</strong>
-        </article>
-        <article class="stat-card">
-          <span class="stat-label">Artisti</span>
-          <strong id="statArtists">--</strong>
-        </article>
-        <article class="stat-card">
-          <span class="stat-label">Dischi fisici</span>
-          <strong id="statDiscs">--</strong>
-        </article>
-        <article class="stat-card">
-          <span class="stat-label">Anni coperti</span>
-          <strong id="statYears">--</strong>
-        </article>
+        <article class="stat-card"><span class="stat-label">Album</span><strong id="statAlbums">--</strong></article>
+        <article class="stat-card"><span class="stat-label">Artisti</span><strong id="statArtists">--</strong></article>
+        <article class="stat-card"><span class="stat-label">Dischi fisici</span><strong id="statDiscs">--</strong></article>
+        <article class="stat-card"><span class="stat-label">Anni coperti</span><strong id="statYears">--</strong></article>
       </section>
 
       <section class="catalog-heading" id="catalogo">
-        <h1 class="sr-only">Catalogo dischi</h1>
+        <h2>Catalogo</h2>
         <p id="resultCount" class="result-count">-- risultati</p>
       </section>
 
-      <section id="statusBox" class="status-box" role="status" aria-live="polite">
-        Carico il catalogo dal CSV...
-      </section>
+      <section id="statusBox" class="status-box" role="status" aria-live="polite">Carico il catalogo dal CSV...</section>
 
       <section id="manualCsvBox" class="manual-csv-box" hidden>
         <div>
           <h2>Non riesco a leggere il CSV automaticamente</h2>
-          <p>
-            Alcuni browser bloccano il caricamento dei file locali aperti con doppio clic.
-            Puoi selezionare manualmente il CSV oppure avviare un piccolo server locale.
-          </p>
+          <p>Alcuni browser bloccano il caricamento dei file locali aperti con doppio clic. Puoi selezionare manualmente il CSV oppure avviare un piccolo server locale.</p>
         </div>
-        <label class="file-picker">
-          Scegli CSV
-          <input id="csvFileInput" type="file" accept=".csv,text/csv" />
-        </label>
+        <label class="file-picker">Scegli CSV<input id="csvFileInput" type="file" accept=".csv,text/csv" /></label>
       </section>
 
       <section id="grid" class="album-grid" aria-label="Dischi"></section>
 
       <section id="emptyState" class="empty-state" hidden>
-        <div class="empty-icon" aria-hidden="true">LP</div>
+        <div class="empty-icon" aria-hidden="true">?</div>
         <h2>Nessun disco trovato</h2>
         <p>Prova a cambiare ricerca o filtri.</p>
       </section>
     </main>
   </div>
+
+  <button id="backToTop" class="back-to-top" type="button" hidden>Back to top</button>
 
   <dialog id="detailDialog" class="detail-dialog" aria-labelledby="dialogTitle">
     <div class="dialog-inner">

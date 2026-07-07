@@ -67,9 +67,13 @@
   let letterResizeHandler = null;
   let letterScrollRaf = 0;
   let smoothScrollRaf = 0;
+  let backToTopRaf = 0;
   let alphabetAnimationTimeout = 0;
   let alphabetNavAnimating = false;
   let alphabetTrackedTargets = [];
+  let searchScrollTimeout = 0;
+  let searchModeOpen = false;
+  let lastSearchFocus = null;
   let initialScrollSettled = false;
   const numberFormatter = new Intl.NumberFormat("it-IT");
 
@@ -79,6 +83,7 @@
     prepareInitialScrollPosition();
     document.body.classList.remove("no-js");
     cacheElements();
+    createSearchMode();
     syncThemeToggle();
     bindEvents();
     updateRandomButtonState();
@@ -119,46 +124,185 @@
     els.detailDialog = document.getElementById("detailDialog");
     els.dialogContent = document.getElementById("dialogContent");
     els.closeDialog = document.getElementById("closeDialog");
+    els.backToTop = document.getElementById("backToTop");
     els.statAlbums = document.getElementById("statAlbums");
     els.statArtists = document.getElementById("statArtists");
     els.statDiscs = document.getElementById("statDiscs");
     els.statYears = document.getElementById("statYears");
   }
 
+
+  function createSearchMode() {
+    const overlay = document.createElement("section");
+    overlay.id = "searchMode";
+    overlay.className = "search-mode";
+    overlay.hidden = true;
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-labelledby", "searchModeTitle");
+    overlay.innerHTML = `
+      <div class="search-mode-panel">
+        <div class="search-mode-head">
+          <div>
+            <p class="eyebrow">Search mode</p>
+            <h2 id="searchModeTitle">Trova un disco</h2>
+          </div>
+          <button id="searchModeClose" class="search-mode-close" type="button" aria-label="Chiudi ricerca">&times;</button>
+        </div>
+        <label class="search-mode-bar">
+          <span aria-hidden="true">検索</span>
+          <input id="searchModeInput" type="search" placeholder="Scrivi almeno 2 lettere..." autocomplete="off" />
+        </label>
+        <div class="search-mode-meta">
+          <p id="searchModeCount">Inizia a scrivere per cercare nel catalogo.</p>
+          <button id="searchModeClear" class="search-mode-clear" type="button">Svuota</button>
+        </div>
+        <div id="searchModeHelp" class="search-mode-help">Gli spazi contano: “capa” trova Caparezza, “capa ” no.</div>
+        <div id="searchModeResults" class="search-mode-results" aria-live="polite"></div>
+      </div>
+    `;
+
+    document.body.append(overlay);
+    els.searchMode = overlay;
+    els.searchModeInput = overlay.querySelector("#searchModeInput");
+    els.searchModeResults = overlay.querySelector("#searchModeResults");
+    els.searchModeCount = overlay.querySelector("#searchModeCount");
+    els.searchModeClose = overlay.querySelector("#searchModeClose");
+    els.searchModeClear = overlay.querySelector("#searchModeClear");
+    els.searchModeHelp = overlay.querySelector("#searchModeHelp");
+  }
+
+  function openSearchMode() {
+    if (searchModeOpen) return;
+    lastSearchFocus = document.activeElement;
+    searchModeOpen = true;
+    els.searchMode.hidden = false;
+    document.body.classList.add("is-search-mode");
+    setSearchModeValue(els.searchInput.value, { focus: false });
+    window.requestAnimationFrame(() => {
+      els.searchModeInput.focus({ preventScroll: true });
+      const length = els.searchModeInput.value.length;
+      els.searchModeInput.setSelectionRange(length, length);
+    });
+  }
+
+  function closeSearchMode() {
+    if (!searchModeOpen) return;
+    searchModeOpen = false;
+    els.searchMode.hidden = true;
+    document.body.classList.remove("is-search-mode");
+    if (document.activeElement && typeof document.activeElement.blur === "function") {
+      document.activeElement.blur();
+    }
+  }
+
+  function setSearchModeValue(value, options = {}) {
+    els.searchModeInput.value = value;
+    handleSearchModeInput(options);
+  }
+
+  function clearSearchMode() {
+    els.searchModeInput.value = "";
+    handleSearchModeInput();
+    els.searchModeInput.focus({ preventScroll: true });
+  }
+
+  function handleSearchModeInput() {
+    const rawQuery = els.searchModeInput.value;
+    els.searchInput.value = rawQuery;
+    const ready = isSearchQueryReady(rawQuery);
+    state.query = ready ? normalizeForSearchQuery(rawQuery) : "";
+    applyFiltersAndRender();
+    renderSearchModeResults();
+  }
+
+  function renderSearchModeResults() {
+    if (!els.searchModeResults) return;
+
+    const rawQuery = els.searchModeInput.value;
+    const ready = isSearchQueryReady(rawQuery);
+    const query = normalizeForSearchQuery(rawQuery);
+    const fragment = document.createDocumentFragment();
+
+    els.searchModeResults.replaceChildren();
+
+    if (!ready) {
+      els.searchModeCount.textContent = rawQuery.length
+        ? "Continua a scrivere: i risultati partono da 2 caratteri."
+        : "Inizia a scrivere per cercare nel catalogo.";
+      els.searchModeResults.innerHTML = `<div class="search-mode-empty">Barra a fuoco. Scrivi almeno due lettere per vedere le tile qui sotto.</div>`;
+      return;
+    }
+
+    const results = getFilteredRecords(query);
+    els.searchModeCount.textContent = `${numberFormatter.format(results.length)} ${results.length === 1 ? "risultato" : "risultati"}`;
+
+    if (!results.length) {
+      els.searchModeResults.innerHTML = `<div class="search-mode-empty">Nessun risultato. In questa ricerca anche eventuali spazi finali o doppi vengono considerati.</div>`;
+      return;
+    }
+
+    results.slice(0, 80).forEach((record) => {
+      fragment.append(createAlbumCard(record));
+    });
+
+    if (results.length > 80) {
+      const more = document.createElement("div");
+      more.className = "search-mode-more";
+      more.textContent = `Mostro i primi 80 risultati su ${numberFormatter.format(results.length)}. Continua a scrivere per restringere.`;
+      fragment.append(more);
+    }
+
+    els.searchModeResults.append(fragment);
+  }
+
+  function isSearchQueryReady(value) {
+    return String(value ?? "").replace(/\s/g, "").length >= 2;
+  }
+
   function bindEvents() {
+    els.searchInput.addEventListener("focus", openSearchMode);
+    els.searchInput.addEventListener("click", openSearchMode);
     els.searchInput.addEventListener("input", () => {
-      state.query = normalizeForSearch(els.searchInput.value);
-      applyFiltersAndRender();
+      openSearchMode();
+      setSearchModeValue(els.searchInput.value);
     });
 
-    els.formatFilter.addEventListener("change", () => {
-      state.format = els.formatFilter.value;
-      applyFiltersAndRender();
+    els.searchModeInput.addEventListener("input", handleSearchModeInput);
+    els.searchModeClose.addEventListener("click", closeSearchMode);
+    els.searchModeClear.addEventListener("click", clearSearchMode);
+    els.searchMode.addEventListener("click", (event) => {
+      if (event.target === els.searchMode) closeSearchMode();
     });
 
-    els.sectionFilter.addEventListener("change", () => {
-      state.section = els.sectionFilter.value;
-      applyFiltersAndRender();
-    });
 
     els.decadeFilter.addEventListener("change", () => {
       state.decade = els.decadeFilter.value;
       applyFiltersAndRender();
+      renderSearchModeResults();
     });
 
     els.groupSelect.addEventListener("change", () => {
       state.groupBy = els.groupSelect.value;
       applyFiltersAndRender();
+      renderSearchModeResults();
     });
 
     els.sortSelect.addEventListener("change", () => {
       state.sort = els.sortSelect.value;
       applyFiltersAndRender();
+      renderSearchModeResults();
     });
 
     els.resetFilters.addEventListener("click", resetFilters);
     els.randomButton.addEventListener("click", openRandomSuggestion);
     if (els.themeToggle) els.themeToggle.addEventListener("click", toggleTheme);
+    if (els.backToTop) {
+      els.backToTop.addEventListener("click", scrollBackToTop);
+      window.addEventListener("scroll", scheduleBackToTopVisibility, { passive: true });
+      window.addEventListener("resize", scheduleBackToTopVisibility);
+      updateBackToTopVisibility();
+    }
 
     els.csvFileInput.addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
@@ -175,7 +319,38 @@
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && els.detailDialog.open) closeDialog();
+      if (event.key === "Escape" && els.detailDialog.open) {
+        closeDialog();
+        return;
+      }
+
+      if (event.key === "Escape" && searchModeOpen) {
+        closeSearchMode();
+      }
+    });
+  }
+
+  function scheduleBackToTopVisibility() {
+    if (backToTopRaf) return;
+    backToTopRaf = window.requestAnimationFrame(() => {
+      backToTopRaf = 0;
+      updateBackToTopVisibility();
+    });
+  }
+
+  function updateBackToTopVisibility() {
+    if (!els.backToTop) return;
+    const threshold = Math.min(900, Math.max(420, window.innerHeight * 0.75));
+    const shouldShow = getScrollTop() > threshold;
+    els.backToTop.hidden = !shouldShow;
+    els.backToTop.classList.toggle("is-visible", shouldShow);
+  }
+
+  function scrollBackToTop() {
+    const shouldReduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    scrollWindowTo(0, shouldReduceMotion ? 0 : 900, shouldReduceMotion, () => {
+      updateBackToTopVisibility();
+      removeCatalogHashFromUrl();
     });
   }
 
@@ -343,24 +518,7 @@
   }
 
   function populateFilters() {
-    const formats = uniqueValues(state.all.map((record) => record.formato)).sort(localeSort);
-    const decades = uniqueValues(state.all.map((record) => record.decade)).sort(sortDecades);
-    const sectionCounts = countBy(state.all, (record) => record.sectionKey);
-
-    els.formatFilter.innerHTML = '<option value="all">Tutti i formati</option>';
-    formats.forEach((format) => {
-      els.formatFilter.append(new Option(format, format));
-    });
-
-    els.sectionFilter.innerHTML = '<option value="all">Tutte le sezioni</option>';
-    Object.values(SECTION_META)
-      .sort((a, b) => a.order - b.order)
-      .forEach((section) => {
-        const count = sectionCounts.get(section.key) ?? 0;
-        if (count > 0) {
-          els.sectionFilter.append(new Option(`${section.label} (${numberFormatter.format(count)})`, section.key));
-        }
-      });
+    const decades = uniqueValues(state.all.map((record) => record.decade)).sort(sortDecadesDesc);
 
     els.decadeFilter.innerHTML = '<option value="all">Tutti gli anni</option>';
     decades.forEach((decade) => {
@@ -383,28 +541,25 @@
   }
 
   function applyFiltersAndRender() {
+    state.filtered = getFilteredRecords(state.query);
+    renderGrid();
+    updateRandomButtonState();
+  }
+
+  function getFilteredRecords(query = "") {
     let next = [...state.all];
 
-    if (state.query) {
-      next = next.filter((record) => record.searchText.includes(state.query));
+    if (query) {
+      next = next.filter((record) => record.searchText.includes(query));
     }
 
-    if (state.format !== "all") {
-      next = next.filter((record) => record.formato === state.format);
-    }
-
-    if (state.section !== "all") {
-      next = next.filter((record) => record.sectionKey === state.section);
-    }
 
     if (state.decade !== "all") {
       next = next.filter((record) => record.decade === state.decade);
     }
 
     next.sort(getSorter(state.sort));
-    state.filtered = next;
-    renderGrid();
-    updateRandomButtonState();
+    return next;
   }
 
   function renderGrid() {
@@ -413,10 +568,12 @@
     const letterTargets = [];
     const specialTargets = [];
     const letterIdCounts = new Map();
+    const navLabels = new Set();
 
     groups.forEach((group) => {
-      if (state.groupBy !== "none") {
-        const groupAnchorId = getGroupAnchorId(group);
+      const groupAnchorId = getGroupAnchorId(group);
+
+      if (state.groupBy === "catalog") {
         fragment.append(createGroupSeparator(group, groupAnchorId));
 
         if (isSpecialSectionGroup(group) && !specialTargets.length) {
@@ -427,26 +584,40 @@
             label: "Vai alle sezioni speciali"
           });
         }
+
+        let lastLetter = "";
+        const showLetters = shouldShowLetterSeparators(group);
+
+        group.items.forEach((record) => {
+          const currentLetter = firstCatalogLetter(record.artista || record.titolo);
+          const isNewLetter = showLetters && currentLetter !== lastLetter;
+
+          if (isNewLetter) {
+            const letterIdBase = `letter-${group.key}-${slugForId(currentLetter)}`;
+            const nextCount = (letterIdCounts.get(letterIdBase) ?? 0) + 1;
+            const targetId = nextCount === 1 ? letterIdBase : `${letterIdBase}-${nextCount}`;
+            letterIdCounts.set(letterIdBase, nextCount);
+            fragment.append(createLetterSeparator(currentLetter, targetId));
+            letterTargets.push({ letter: currentLetter, id: targetId, type: "letter" });
+          }
+
+          fragment.append(createAlbumCard(record));
+          lastLetter = currentLetter;
+        });
+
+        return;
       }
 
-      let lastLetter = "";
-      const showLetters = shouldShowLetterSeparators(group);
+      fragment.append(createCompactGroupSeparator(group.label, groupAnchorId));
+
+      const navTarget = getGroupNavTarget(group, groupAnchorId);
+      if (navTarget && !navLabels.has(navTarget.letter)) {
+        navLabels.add(navTarget.letter);
+        letterTargets.push(navTarget);
+      }
 
       group.items.forEach((record) => {
-        const currentLetter = firstCatalogLetter(record.artista || record.titolo);
-        const isNewLetter = showLetters && currentLetter !== lastLetter;
-
-        if (isNewLetter) {
-          const letterIdBase = `letter-${group.key}-${slugForId(currentLetter)}`;
-          const nextCount = (letterIdCounts.get(letterIdBase) ?? 0) + 1;
-          const targetId = nextCount === 1 ? letterIdBase : `${letterIdBase}-${nextCount}`;
-          letterIdCounts.set(letterIdBase, nextCount);
-          fragment.append(createLetterSeparator(currentLetter, targetId));
-          letterTargets.push({ letter: currentLetter, id: targetId, type: "letter" });
-        }
-
         fragment.append(createAlbumCard(record));
-        lastLetter = currentLetter;
       });
     });
 
@@ -455,6 +626,122 @@
     updateAlphabetNav(letterTargets, specialTargets);
     els.resultCount.textContent = `${numberFormatter.format(state.filtered.length)} ${state.filtered.length === 1 ? "risultato" : "risultati"}`;
     els.emptyState.hidden = state.filtered.length > 0;
+  }
+
+  function createCompactGroupSeparator(label, id = "") {
+    const divider = document.createElement("div");
+    divider.className = "letter-separator group-label-separator";
+    if (id) divider.id = id;
+    divider.dataset.letter = label;
+    divider.setAttribute("role", "heading");
+    divider.setAttribute("aria-level", "2");
+    divider.setAttribute("aria-label", label);
+    divider.title = label;
+    divider.innerHTML = dividerLabelHtml(label);
+    return divider;
+  }
+
+  function dividerLabelHtml(value) {
+    const text = clean(value).replace(/^Anni\s+/i, "");
+    if (!text) return '<span class="divider-space-dash">-</span>';
+
+    return [...text.toUpperCase()]
+      .map((char) => {
+        if (/\s/.test(char) || char === "_") return '<span class="divider-space-dash">-</span>';
+        return escapeHtml(char);
+      })
+      .join(" ")
+      .trim();
+  }
+
+  function getGroupNavTarget(group, groupAnchorId) {
+    if (state.groupBy === "format") return null;
+
+    if (state.groupBy === "artist") {
+      const letter = firstCatalogLetter(group.label);
+      return { letter, id: groupAnchorId, type: "letter", label: `Vai agli artisti con ${letter}` };
+    }
+
+    if (state.groupBy === "decade") {
+      const letter = group.key === "Senza anno" ? "--" : String(group.key).slice(-2, -1) || String(group.key).slice(0, 1);
+      return { letter, id: groupAnchorId, type: "letter", label: `Vai a ${group.label}` };
+    }
+
+    if (state.groupBy === "country") {
+      const normalized = clean(group.label)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/gi, "")
+        .toUpperCase();
+      const letter = normalized ? normalized.slice(0, 2).padEnd(2, "-") : "--";
+      return { letter, id: groupAnchorId, type: "letter", label: `Vai a ${group.label}` };
+    }
+
+    return null;
+  }
+
+  function shouldUseArtistBlocks(group) {
+    return false;
+  }
+
+  function buildArtistClusters(records) {
+    const clusters = [];
+
+    records.forEach((record) => {
+      const artistName = clean(record.artista) || "Artista sconosciuto";
+      const artistKey = normalizeForSearch(artistName);
+      const current = clusters[clusters.length - 1];
+
+      if (!current || current.key !== artistKey) {
+        clusters.push({
+          key: artistKey,
+          artist: artistName,
+          items: [record]
+        });
+        return;
+      }
+
+      current.items.push(record);
+    });
+
+    return clusters;
+  }
+
+  function createArtistBlock(cluster) {
+    const block = document.createElement("section");
+    block.className = "artist-block";
+    block.dataset.artist = cluster.artist;
+    block.setAttribute("aria-label", `Dischi di ${cluster.artist}`);
+
+    const years = cluster.items
+      .map((record) => record.annoNumber)
+      .filter(Number.isFinite)
+      .sort((a, b) => a - b);
+    const yearLabel = years.length
+      ? years[0] === years[years.length - 1] ? String(years[0]) : `${years[0]}-${years[years.length - 1]}`
+      : "anni n.d.";
+    const discCount = cluster.items.reduce((sum, record) => sum + (record.dischi ?? 0), 0);
+    const albumLabel = `${numberFormatter.format(cluster.items.length)} ${cluster.items.length === 1 ? "album" : "album"}`;
+    const physicalLabel = discCount > 0 ? ` · ${numberFormatter.format(discCount)} ${discCount === 1 ? "disco fisico" : "dischi fisici"}` : "";
+
+    const header = document.createElement("header");
+    header.className = "artist-block-head";
+    header.innerHTML = `
+      <div class="artist-block-stamp" aria-hidden="true">Artist</div>
+      <div class="artist-block-copy">
+        <h3>${escapeHtml(cluster.artist)}</h3>
+        <p>${escapeHtml(albumLabel + physicalLabel)} · ${escapeHtml(yearLabel)}</p>
+      </div>
+    `;
+
+    const grid = document.createElement("div");
+    grid.className = "artist-block-grid";
+    cluster.items.forEach((record, index) => {
+      grid.append(createAlbumCard(record, { startsArtist: index === 0 }));
+    });
+
+    block.append(header, grid);
+    return block;
   }
 
   function shouldShowLetterSeparators(group) {
@@ -492,7 +779,10 @@
     );
 
     const specialTarget = specialTargets.find((target) => document.getElementById(target.id));
-    const navTargets = specialTarget ? [...uniqueTargets, specialTarget] : uniqueTargets;
+    const navTargets = [
+      ...uniqueTargets,
+      ...(specialTarget ? [specialTarget] : [])
+    ];
     const hasTargets = navTargets.length > 0;
 
     els.appShell?.classList.toggle("is-alphabet-hidden", !hasTargets);
@@ -530,6 +820,7 @@
       link.classList.add("is-special-jump");
       link.title = "Vai alle sezioni speciali";
     }
+
 
     return link;
   }
@@ -1127,8 +1418,8 @@
 
     if (state.groupBy === "decade") {
       return groupsFromMap(records, (record) => record.decade, {
-        label: (key) => key === "Senza anno" ? "Senza anno" : `Anni ${key}`,
-        sort: (a, b) => sortDecades(a.key, b.key)
+        label: (key) => key === "Senza anno" ? "Senza anno" : String(key),
+        sort: (a, b) => sortDecadesDesc(a.key, b.key)
       });
     }
 
@@ -1343,13 +1634,13 @@
     state.lastRandomId = "";
     if (els.randomHint) els.randomHint.textContent = "Pesca un album casuale dai risultati visibili.";
     resetControlsOnly();
+    if (els.searchModeInput) els.searchModeInput.value = "";
     applyFiltersAndRender();
+    renderSearchModeResults();
   }
 
   function resetControlsOnly() {
     els.searchInput.value = "";
-    els.formatFilter.value = "all";
-    els.sectionFilter.value = "all";
     els.decadeFilter.value = "all";
     els.groupSelect.value = DEFAULT_GROUP;
     els.sortSelect.value = "artist-az";
@@ -1416,6 +1707,12 @@
     if (a === "Senza anno") return 1;
     if (b === "Senza anno") return -1;
     return Number(a) - Number(b);
+  }
+
+  function sortDecadesDesc(a, b) {
+    if (a === "Senza anno") return 1;
+    if (b === "Senza anno") return -1;
+    return Number(b) - Number(a);
   }
 
   function countBy(records, getter) {
@@ -1545,6 +1842,13 @@
 
   function normalizeForSearch(value) {
     return clean(value)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
+  function normalizeForSearchQuery(value) {
+    return String(value ?? "")
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
