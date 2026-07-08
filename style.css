@@ -858,155 +858,6 @@ body.is-search-mode {
   }
 }
 
-/* v7: blocchi morbidi per artista nel catalogo base */
-.artist-block {
-  grid-column: 1 / -1;
-  display: grid;
-  gap: 10px;
-  padding: 12px;
-  border: 2px solid color-mix(in srgb, var(--ink) 72%, transparent);
-  border-radius: 24px;
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--card) 78%, var(--yellow)), color-mix(in srgb, var(--paper) 84%, var(--cyan))),
-    var(--card);
-  box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 28%, transparent);
-}
-
-.artist-block + .artist-block {
-  margin-top: 2px;
-}
-
-.artist-block-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 0;
-  padding: 6px 8px 8px;
-  border-bottom: 2px dashed color-mix(in srgb, var(--ink) 42%, transparent);
-}
-
-.artist-block-stamp {
-  flex: 0 0 auto;
-  padding: 5px 8px;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  background: var(--red);
-  color: #fff0d3;
-  font-family: var(--font-mono);
-  font-size: .68rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  transform: rotate(-1.5deg);
-}
-
-.artist-block-copy {
-  min-width: 0;
-}
-
-.artist-block-copy h3 {
-  margin: 0;
-  color: var(--ink);
-  font-family: var(--font-display);
-  font-size: clamp(1.7rem, 3vw, 3.2rem);
-  line-height: .82;
-  letter-spacing: .015em;
-  overflow-wrap: break-word;
-}
-
-.artist-block-copy p {
-  margin: 5px 0 0;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: .78rem;
-  font-weight: 800;
-  line-height: 1.35;
-}
-
-.artist-block-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 10px;
-  align-items: stretch;
-}
-
-.artist-block .album-card {
-  box-shadow: none;
-}
-
-.artist-block .album-card:hover {
-  box-shadow: 7px 7px 0 rgba(16,16,24,.16);
-}
-
-:root[data-theme="dark"] .artist-block {
-  border-color: rgba(12, 14, 18, .82);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--card) 88%, #101018), color-mix(in srgb, var(--paper-2) 78%, #101018)),
-    var(--card);
-  box-shadow: 4px 4px 0 rgba(0, 0, 0, .34);
-}
-
-:root[data-theme="dark"] .artist-block-head {
-  border-bottom-color: rgba(234, 223, 199, .22);
-}
-
-:root[data-theme="dark"] .artist-block-stamp {
-  border-color: #101018;
-  background: color-mix(in srgb, var(--red) 78%, #101018);
-  color: #f3e6ca;
-}
-
-@media (max-width: 760px) {
-  .artist-block {
-    padding: 10px;
-    border-radius: 20px;
-  }
-
-  .artist-block-head {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .artist-block-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* v8: filtri e viste uniformate */
-.group-label-separator {
-  margin-top: 18px;
-  color: var(--text);
-  font-size: clamp(.78rem, 1.15vw, .95rem);
-  letter-spacing: .08em;
-}
-
-.group-label-separator::after {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 42%, transparent), transparent);
-}
-
-:root[data-theme="dark"] .group-label-separator {
-  color: var(--cream-ink, var(--text));
-}
-
-@media (max-width: 1120px) {
-  .filter-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-}
-
-@media (max-width: 760px) {
-  .filter-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .group-label-separator {
-    font-size: .82rem;
-  }
-}
-
-
 /* v9: separatori compatti in stile lettera e filtri in elenco */
 .filter-grid {
   grid-template-columns: 1fr !important;
@@ -1111,5 +962,1121 @@ body.is-search-mode {
     padding: 0 13px;
     font-size: .7rem;
     box-shadow: 4px 4px 0 var(--ink);
+  }
+}
+
+
+/* v7: Dettaglio disco con titolo orizzontale sopra la cover */
+.dialog-inner {
+  box-shadow: none !important;
+}
+
+.dialog-layout {
+  grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
+  grid-template-areas:
+    "title title"
+    "cover body";
+  align-items: start;
+  padding-top: clamp(24px, 4vw, 42px);
+}
+
+.dialog-title-panel {
+  grid-area: title;
+  min-width: 0;
+  padding-right: 58px;
+}
+
+.dialog-title-panel .eyebrow {
+  margin-bottom: 6px;
+}
+
+.dialog-title-static {
+  display: -webkit-box;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(2.05rem, 4.1vw, 3.8rem);
+  line-height: .86;
+  letter-spacing: .01em;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.dialog-title-static.is-long-title {
+  font-size: clamp(1.8rem, 3.55vw, 3.25rem);
+  line-height: .9;
+}
+
+.dialog-cover {
+  grid-area: cover;
+}
+
+.dialog-body {
+  grid-area: body;
+  padding-top: 0;
+}
+
+.dialog-body > .detail-tags:first-child {
+  margin-top: 0;
+}
+
+@media (max-width: 640px) {
+  .dialog-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "cover"
+      "body";
+    padding-top: 70px;
+  }
+
+  .dialog-title-panel {
+    padding-right: 0;
+  }
+
+  .dialog-title-static {
+    font-size: clamp(1.85rem, 10vw, 3rem);
+  }
+
+  .dialog-title-static.is-long-title {
+    font-size: clamp(1.65rem, 8.8vw, 2.65rem);
+  }
+}
+
+/* v11: mobile usability pass - compatto, leggibile, meno scroll iniziale */
+@media (max-width: 760px) {
+  :root {
+    --mobile-pad: 10px;
+  }
+
+  body {
+    font-size: 14px;
+    background-size: 24px 100%, 24px 24px, auto;
+  }
+
+  body::before {
+    opacity: .035;
+  }
+
+  .sidebar {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "filters";
+    gap: 10px;
+    height: auto;
+    padding: var(--mobile-pad);
+    overflow: visible;
+    border-right: 0;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .brand {
+    margin-bottom: 0;
+    gap: 9px;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+    border-width: 2px;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-size: 1.18rem;
+  }
+
+  .brand-copy {
+    flex: 1;
+  }
+
+  .brand-home {
+    font-size: clamp(1.45rem, 8vw, 1.9rem);
+  }
+
+  .theme-toggle {
+    min-height: 32px;
+    padding: 3px 4px;
+    border-width: 2px;
+  }
+
+  .theme-toggle-dot {
+    width: 22px;
+    height: 22px;
+  }
+
+  .side-toolbar {
+    gap: 9px;
+    padding: 10px;
+    border-radius: 18px;
+    box-shadow: 4px 4px 0 rgba(16, 16, 24, .14);
+  }
+
+  .side-toolbar-title {
+    display: none;
+  }
+
+  .search-wrap {
+    padding: 0 10px;
+    border-radius: 18px;
+  }
+
+  .search-wrap input {
+    height: 42px;
+    font-size: 16px;
+  }
+
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .filter-grid label > span {
+    font-size: .66rem;
+  }
+
+  select,
+  .ghost-button,
+  .file-picker {
+    min-height: 38px;
+    border-width: 2px;
+    font-size: .86rem;
+  }
+
+  select {
+    padding-left: 9px;
+    padding-right: 24px;
+  }
+
+  .ghost-button {
+    width: 100%;
+  }
+
+  /* Sul telefono liberiamo subito spazio verticale: random e sorgente restano desktop/tablet. */
+  .random-button,
+  .sidebar-card {
+    display: none;
+  }
+
+  .alphabet-nav {
+    position: sticky;
+    top: 0;
+    z-index: 55;
+    min-height: 42px;
+    padding: 6px 10px;
+    gap: 4px;
+    border-bottom-width: 3px;
+    scrollbar-width: none;
+  }
+
+  .alphabet-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .alphabet-nav a {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    font-size: .68rem;
+  }
+
+  .main-content {
+    padding: 10px 10px 72px;
+  }
+
+  .hero {
+    display: none;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(82px, 1fr));
+    gap: 8px;
+    margin: 2px 0 12px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .stats-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stat-card {
+    min-width: 82px;
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 4px 4px 0 rgba(16, 16, 24, .14);
+  }
+
+  .stat-card::after {
+    display: none;
+  }
+
+  .stat-label {
+    font-size: .58rem;
+    letter-spacing: .05em;
+  }
+
+  .stat-card strong {
+    font-size: clamp(1.55rem, 8vw, 2.25rem);
+    line-height: .9;
+  }
+
+  .catalog-heading {
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+    margin: 4px 0 10px;
+    padding: 8px 0;
+  }
+
+  .catalog-heading h2 {
+    font-size: clamp(2.45rem, 15vw, 3.6rem);
+  }
+
+  .result-count {
+    margin-left: auto;
+    padding: 6px 9px;
+    font-size: .72rem;
+  }
+
+  .album-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .group-separator {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 18px;
+    box-shadow: 4px 4px 0 rgba(16, 16, 24, .14);
+  }
+
+  .group-copy h2 {
+    font-size: clamp(1.85rem, 11vw, 3rem);
+  }
+
+  .group-copy p {
+    font-size: .86rem;
+  }
+
+  .letter-separator {
+    margin: 12px 0 -1px;
+    font-size: 1.8rem;
+  }
+
+  .album-card {
+    grid-template-columns: minmax(0, 1fr) 78px;
+    gap: 8px;
+    min-height: 112px;
+    padding: 12px 0 12px 14px;
+    border-radius: 18px;
+    box-shadow: 4px 4px 0 rgba(16, 16, 24, .14);
+  }
+
+  .album-card:hover {
+    transform: none;
+    box-shadow: 4px 4px 0 rgba(16, 16, 24, .14);
+  }
+
+  .card-title {
+    font-size: .98rem;
+    line-height: 1.16;
+  }
+
+  .card-artist {
+    margin-top: 5px;
+    font-size: .86rem;
+  }
+
+  .card-meta {
+    gap: 5px;
+  }
+
+  .chip {
+    padding: 4px 7px;
+    font-size: .68rem;
+  }
+
+  .card-art {
+    width: 78px;
+    height: 92px;
+  }
+
+  .card-cover-sleeve {
+    right: 8px;
+    width: 68px;
+    height: 68px;
+    border-radius: 10px;
+  }
+
+  .card-cover-fallback {
+    right: -25px;
+    width: 84px;
+    height: 84px;
+  }
+
+  .vinyl-disc {
+    width: 84px;
+    height: 84px;
+  }
+
+  .back-to-top {
+    right: 10px;
+    bottom: 10px;
+    min-height: 38px;
+    padding: 0 12px;
+    border-width: 2px;
+    font-size: .66rem;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .search-mode {
+    padding: 8px;
+  }
+
+  .search-mode-panel {
+    max-height: calc(100dvh - 16px);
+    border-radius: 22px;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .search-mode-head h2 {
+    font-size: clamp(2.4rem, 15vw, 4.2rem);
+  }
+
+  .search-mode-bar {
+    padding: 7px 12px;
+  }
+
+  .search-mode-bar input {
+    height: 46px;
+    font-size: 1.15rem;
+  }
+
+  .search-mode-results {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    min-height: 150px;
+  }
+
+  .detail-dialog {
+    width: calc(100vw - 10px);
+    max-width: calc(100vw - 10px);
+    max-height: calc(100dvh - 10px);
+  }
+
+  .dialog-inner {
+    max-height: calc(100dvh - 10px);
+    border-radius: 22px;
+    border-width: 2px;
+  }
+
+  .close-button {
+    top: 10px;
+    right: 10px;
+    width: 42px;
+    height: 42px;
+    border-width: 2px;
+  }
+
+  .dialog-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "cover"
+      "body";
+    gap: 14px;
+    padding: 58px 14px 18px;
+  }
+
+  .dialog-title-panel {
+    padding-right: 0;
+  }
+
+  .dialog-title-panel .eyebrow {
+    margin-bottom: 5px;
+    font-size: .66rem;
+  }
+
+  .dialog-title-static {
+    font-size: clamp(2rem, 12vw, 3.2rem);
+    line-height: .88;
+  }
+
+  .dialog-title-static.is-long-title {
+    font-size: clamp(1.72rem, 10vw, 2.65rem);
+    line-height: .9;
+  }
+
+  .dialog-artist {
+    margin-top: 8px;
+    font-size: 1rem;
+  }
+
+  .dialog-cover-stage {
+    width: min(280px, 100%);
+    border-radius: 18px;
+    border-width: 2px;
+  }
+
+  .detail-tags {
+    margin: 0 0 10px;
+    gap: 6px;
+  }
+
+  .detail-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+
+  .detail-item {
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .detail-item dt {
+    font-size: .64rem;
+  }
+
+  .detail-item dd {
+    font-size: .92rem;
+    line-height: 1.32;
+  }
+
+  .note-box {
+    margin-top: 8px;
+    padding: 11px;
+    font-size: .92rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(4, 78px);
+  }
+
+  .catalog-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .result-count {
+    margin-left: 0;
+  }
+
+  .detail-list {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dialog-cover-stage {
+    width: min(260px, 100%);
+  }
+}
+
+/* v12: mobile refactor - collapsible filters, 2x2 stats, compact two-column cards */
+.mobile-filter-row {
+  display: grid;
+  gap: 10px;
+}
+
+.filter-toggle {
+  display: none;
+}
+
+.filter-panel {
+  display: grid;
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    gap: 9px;
+  }
+
+  .side-toolbar {
+    gap: 8px;
+    padding: 9px;
+  }
+
+  .mobile-filter-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 42px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-toggle {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    background: var(--yellow);
+    color: #101018;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition: transform .24s ease, background .18s ease, box-shadow .18s ease;
+  }
+
+  .filter-toggle span {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 900;
+    line-height: 1;
+    transform: translateY(-1px);
+    transition: transform .28s ease;
+  }
+
+  .side-toolbar.is-filters-open .filter-toggle {
+    background: var(--cyan);
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .side-toolbar.is-filters-open .filter-toggle span {
+    transform: translateY(1px) rotate(180deg);
+  }
+
+  .filter-panel {
+    display: grid;
+    gap: 8px;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: max-height .34s ease, opacity .22s ease, transform .34s ease;
+  }
+
+  .side-toolbar.is-filters-open .filter-panel {
+    max-height: 260px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .stat-card {
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .stat-card strong {
+    font-size: clamp(2rem, 12vw, 3rem);
+  }
+
+  .album-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .album-card {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "copy"
+      "vinyl";
+    gap: 7px;
+    min-height: 198px;
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .album-card::before {
+    width: 6px;
+  }
+
+  .card-copy {
+    padding-left: 3px;
+    padding-right: 2px;
+  }
+
+  .card-title {
+    font-size: .9rem;
+    line-height: 1.12;
+    -webkit-line-clamp: 2;
+  }
+
+  .card-artist {
+    margin-top: 4px;
+    font-size: .78rem;
+    line-height: 1.22;
+    -webkit-line-clamp: 2;
+  }
+
+  .card-art {
+    position: relative;
+    grid-area: vinyl;
+    justify-self: stretch;
+    align-self: end;
+    display: grid;
+    width: 100%;
+    height: 102px;
+    place-items: center;
+    overflow: hidden;
+    border: 2px solid color-mix(in srgb, var(--ink) 70%, transparent);
+    border-radius: 14px;
+    background:
+      linear-gradient(180deg, color-mix(in srgb, var(--card) 72%, transparent), color-mix(in srgb, var(--paper) 82%, transparent)),
+      linear-gradient(135deg, color-mix(in srgb, var(--cyan) 30%, transparent), color-mix(in srgb, var(--pink) 22%, transparent));
+  }
+
+  .card-cover-sleeve {
+    right: 50%;
+    top: 12px;
+    width: 76px;
+    height: 76px;
+    border-radius: 10px;
+    transform: translateX(50%) translateY(8px) rotate(2deg) scale(.94);
+  }
+
+  .album-card.has-cover .card-cover-sleeve,
+  .album-card.has-cover .cover-overlay {
+    transform: translateX(50%) translateY(0) rotate(-2deg) scale(1);
+  }
+
+  .card-cover-fallback {
+    right: 50%;
+    top: 9px;
+    width: 82px;
+    height: 82px;
+    transform: translateX(58%);
+    opacity: .62;
+  }
+
+  .vinyl-disc {
+    width: 82px;
+    height: 82px;
+  }
+
+  .album-card.has-cover .card-cover-fallback {
+    opacity: .13;
+  }
+
+  .card-meta {
+    grid-area: vinyl;
+    z-index: 4;
+    align-self: end;
+    justify-self: stretch;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 5px 6px;
+    min-width: 0;
+  }
+
+  .chip {
+    max-width: 100%;
+    padding: 3px 6px;
+    border-width: 1.5px;
+    font-size: .6rem;
+    background: color-mix(in srgb, var(--paper) 88%, white);
+  }
+
+  .remaster-badge {
+    top: 7px;
+    right: 7px;
+    width: 22px;
+    height: 22px;
+    font-size: .62rem;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .dialog-title-static {
+    font-size: clamp(1.75rem, 9vw, 2.75rem);
+    line-height: .9;
+  }
+
+  .dialog-title-static.is-long-title {
+    font-size: clamp(1.5rem, 7.8vw, 2.25rem);
+    line-height: .94;
+  }
+
+  .dialog-artist {
+    font-size: .96rem;
+  }
+
+  .detail-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+
+  .note-box {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 420px) {
+  .filter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .album-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .album-card {
+    min-height: 190px;
+    padding: 9px;
+  }
+
+  .card-title {
+    font-size: .84rem;
+  }
+
+  .card-artist {
+    font-size: .74rem;
+  }
+
+  .card-art {
+    height: 96px;
+  }
+
+  .card-cover-sleeve {
+    width: 70px;
+    height: 70px;
+  }
+
+  .card-cover-fallback,
+  .vinyl-disc {
+    width: 76px;
+    height: 76px;
+  }
+
+  .chip {
+    font-size: .56rem;
+    padding: 3px 5px;
+  }
+
+  .detail-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .detail-item {
+    padding: 9px;
+  }
+
+  .detail-item dt {
+    font-size: .58rem;
+  }
+
+  .detail-item dd {
+    font-size: .84rem;
+  }
+}
+
+@media (max-width: 340px) {
+  .album-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .album-card {
+    min-height: 182px;
+  }
+}
+
+
+/* v13: rifiniture mobile card/stat/tag */
+@media (max-width: 760px) {
+  /* Numeri iniziali meno invasivi */
+  .stat-card {
+    padding: 10px 11px;
+  }
+
+  .stat-card strong {
+    font-size: clamp(1.45rem, 8.4vw, 2.15rem) !important;
+    line-height: .92;
+  }
+
+  .stat-label {
+    font-size: .64rem;
+  }
+
+  /* Card mobile piu pulite: meno spazio vuoto, niente riquadro attorno alla cover */
+  .album-card {
+    gap: 4px;
+    min-height: 176px;
+    padding: 9px 8px 8px;
+  }
+
+  .card-copy {
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+
+  .card-title {
+    font-size: .98rem;
+    line-height: 1.08;
+  }
+
+  .card-artist {
+    margin-top: 3px;
+    font-size: .78rem;
+    line-height: 1.16;
+  }
+
+  .card-art {
+    height: 88px;
+    margin-top: -1px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .card-cover-sleeve {
+    top: 6px;
+    width: 74px;
+    height: 74px;
+  }
+
+  .card-cover-fallback {
+    top: 4px;
+    width: 80px;
+    height: 80px;
+  }
+
+  .vinyl-disc {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* Tag piu leggibili nelle card */
+  .card-meta {
+    gap: 5px;
+    padding: 0 4px 2px;
+  }
+
+  .chip {
+    padding: 4px 7px;
+    border-width: 1.5px;
+    font-size: .66rem;
+    line-height: 1.05;
+  }
+
+  /* Dettaglio disco: titolo un filo piu compatto, dettagli piu leggibili */
+  .dialog-title-static {
+    font-size: clamp(1.55rem, 8.2vw, 2.35rem);
+    line-height: .92;
+  }
+
+  .dialog-title-static.is-long-title {
+    font-size: clamp(1.36rem, 7.1vw, 2.05rem);
+    line-height: .96;
+  }
+
+  .detail-tags .chip {
+    font-size: .78rem;
+    padding: 5px 8px;
+  }
+
+  .detail-item dt {
+    font-size: .66rem;
+  }
+
+  .detail-item dd {
+    font-size: .94rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .stat-card strong {
+    font-size: clamp(1.35rem, 8vw, 1.9rem) !important;
+  }
+
+  .album-card {
+    min-height: 170px;
+    padding: 8px 7px 7px;
+  }
+
+  .card-title {
+    font-size: .92rem;
+  }
+
+  .card-art {
+    height: 84px;
+  }
+
+  .card-cover-sleeve {
+    top: 5px;
+    width: 68px;
+    height: 68px;
+  }
+
+  .card-cover-fallback,
+  .vinyl-disc {
+    width: 74px;
+    height: 74px;
+  }
+
+  .chip {
+    font-size: .62rem;
+    padding: 4px 6px;
+  }
+
+  .detail-tags .chip {
+    font-size: .74rem;
+  }
+
+  .detail-item dt {
+    font-size: .62rem;
+  }
+
+  .detail-item dd {
+    font-size: .9rem;
+  }
+}
+
+/* v15: dettaglio disco senza X, titoli liberi e chiusura su qualunque click */
+.detail-dialog .close-button {
+  display: none !important;
+}
+
+.dialog-title-panel {
+  padding-right: 0 !important;
+}
+
+.dialog-title-static,
+.dialog-title-static.is-long-title {
+  display: block !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  max-height: none !important;
+  text-wrap: balance;
+}
+
+.card-title {
+  display: block !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  max-height: none !important;
+}
+
+@media (max-width: 760px) {
+  .dialog-layout {
+    padding-top: 18px !important;
+  }
+
+  .album-card {
+    min-height: auto;
+  }
+}
+
+/* v16: dettaglio disco chiudibile ovunque + cover/disco piu grande */
+.detail-dialog {
+  width: min(1040px, calc(100vw - 28px));
+}
+
+.dialog-layout {
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr) !important;
+}
+
+.dialog-cover-stage {
+  width: min(420px, 100%) !important;
+}
+
+.dialog-record-stage {
+  width: 84% !important;
+}
+
+.dialog-inner,
+.dialog-layout,
+.dialog-title-panel,
+.dialog-cover,
+.dialog-body,
+.detail-tags,
+.detail-list,
+.detail-item,
+.note-box {
+  cursor: pointer;
+}
+
+@media (max-width: 760px) {
+  .detail-dialog {
+    width: calc(100vw - 10px);
+    max-width: calc(100vw - 10px);
+  }
+
+  .dialog-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "title"
+      "cover"
+      "body";
+    gap: 16px !important;
+  }
+
+  .dialog-cover-stage {
+    width: min(360px, 100%) !important;
+  }
+
+  .dialog-record-stage {
+    width: 86% !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .dialog-cover-stage {
+    width: min(340px, 100%) !important;
+  }
+}
+
+/* v17: titolo libero solo nel dettaglio, tile esterne con ellissi a 2 righe */
+.card-title {
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  line-clamp: 2 !important;
+  max-height: none !important;
+  text-overflow: ellipsis !important;
+}
+
+.dialog-title-static,
+.dialog-title-static.is-long-title {
+  display: block !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  max-height: none !important;
+  text-overflow: clip !important;
+}
+
+/* In assenza cover, il vinile nel dettaglio deve avere piu presenza, come su desktop. */
+.dialog-cover-stage:not(.has-cover) .dialog-record-stage {
+  width: 90% !important;
+}
+
+.dialog-cover-stage:not(.has-cover) .dialog-vinyl {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+@media (max-width: 760px) {
+  .dialog-cover-stage:not(.has-cover) .dialog-record-stage {
+    width: 92% !important;
   }
 }

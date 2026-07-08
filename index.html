@@ -19,9 +19,9 @@
       }
     })();
   </script>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=mobile-v17" />
   <script>window.DISCOTECA_CSV = "Dischi.csv";</script>
-  <script src="app.js" defer></script>
+  <script src="app.js?v=mobile-v17" defer></script>
 </head>
 <body class="no-js">
   <div id="pageTop" class="page-top-anchor" aria-hidden="true"></div>
@@ -47,41 +47,38 @@
           <strong>Search deck</strong>
         </div>
 
-        <div class="search-wrap">
-          <label class="sr-only" for="searchInput">Cerca per titolo, artista o dettaglio</label>
-          <span aria-hidden="true">検索</span>
-          <input id="searchInput" type="search" placeholder="Titolo, artista, formato..." autocomplete="off" />
+        <div class="mobile-filter-row">
+          <div class="search-wrap">
+            <label class="sr-only" for="searchInput">Cerca per titolo, artista o dettaglio</label>
+            <span aria-hidden="true">検索</span>
+            <input id="searchInput" type="search" placeholder="Titolo, artista, formato..." autocomplete="off" />
+          </div>
+          <button id="filterToggle" class="filter-toggle" type="button" aria-label="Mostra filtri" aria-expanded="false" aria-controls="filterPanel">
+            <span aria-hidden="true">⌄</span>
+          </button>
         </div>
 
-        <div class="filter-grid">
-          <label>
-            <span>Decennio</span>
-            <select id="decadeFilter"><option value="all">Tutti</option></select>
-          </label>
+        <div id="filterPanel" class="filter-panel">
+          <div class="filter-grid">
+            <label>
+              <span>Decennio</span>
+              <select id="decadeFilter"><option value="all">Tutti</option></select>
+            </label>
 
-          <label>
-            <span>Vista</span>
-            <select id="groupSelect">
-              <option value="catalog">Catalogo compatto</option>
-              <option value="artist">Separa per artista</option>
-              <option value="decade">Separa per decade</option>
-              <option value="format">Separa per formato</option>
-              <option value="country">Separa per paese</option>
-            </select>
-          </label>
+            <label>
+              <span>Vista</span>
+              <select id="groupSelect">
+                <option value="catalog">Catalogo compatto</option>
+                <option value="artist">Separa per artista</option>
+                <option value="decade">Separa per decade</option>
+                <option value="format">Separa per formato</option>
+                <option value="country">Separa per paese</option>
+              </select>
+            </label>
+          </div>
 
-          <label class="filter-wide">
-            <span>Ordine</span>
-            <select id="sortSelect">
-              <option value="artist-az">Artista A-Z / anno recente</option>
-              <option value="title-az">Titolo A-Z</option>
-              <option value="year-desc">Anno pi&ugrave; recente</option>
-              <option value="year-asc">Anno pi&ugrave; vecchio</option>
-            </select>
-          </label>
+          <button id="resetFilters" class="ghost-button" type="button">Reset filtri</button>
         </div>
-
-        <button id="resetFilters" class="ghost-button" type="button">Reset filtri</button>
       </section>
 
       <button id="randomButton" class="random-button" type="button" disabled>

@@ -56,7 +56,6 @@
     decade: "all",
     section: "all",
     groupBy: DEFAULT_GROUP,
-    sort: "artist-az",
     lastRandomId: ""
   };
 
@@ -71,7 +70,7 @@
   let alphabetAnimationTimeout = 0;
   let alphabetNavAnimating = false;
   let alphabetTrackedTargets = [];
-  let searchScrollTimeout = 0;
+  let searchModeRenderTimeout = 0;
   let searchModeOpen = false;
   let lastSearchFocus = null;
   let initialScrollSettled = false;
@@ -110,11 +109,11 @@
     els.csvFileInput = document.getElementById("csvFileInput");
     els.sourceName = document.getElementById("sourceName");
     els.searchInput = document.getElementById("searchInput");
-    els.formatFilter = document.getElementById("formatFilter");
-    els.sectionFilter = document.getElementById("sectionFilter");
+    els.filterToggle = document.getElementById("filterToggle");
+    els.filterPanel = document.getElementById("filterPanel");
+    els.brandHome = document.querySelector(".brand-home");
     els.decadeFilter = document.getElementById("decadeFilter");
     els.groupSelect = document.getElementById("groupSelect");
-    els.sortSelect = document.getElementById("sortSelect");
     els.resetFilters = document.getElementById("resetFilters");
     els.themeToggle = document.getElementById("themeToggle");
     els.randomButton = document.getElementById("randomButton");
@@ -191,6 +190,7 @@
     searchModeOpen = false;
     els.searchMode.hidden = true;
     document.body.classList.remove("is-search-mode");
+    flushSearchModeGridSync();
     if (document.activeElement && typeof document.activeElement.blur === "function") {
       document.activeElement.blur();
     }
@@ -212,8 +212,28 @@
     els.searchInput.value = rawQuery;
     const ready = isSearchQueryReady(rawQuery);
     state.query = ready ? normalizeForSearchQuery(rawQuery) : "";
-    applyFiltersAndRender();
     renderSearchModeResults();
+    scheduleSearchModeGridSync();
+  }
+
+  function scheduleSearchModeGridSync() {
+    if (searchModeRenderTimeout) {
+      window.clearTimeout(searchModeRenderTimeout);
+    }
+
+    searchModeRenderTimeout = window.setTimeout(() => {
+      searchModeRenderTimeout = 0;
+      applyFiltersAndRender();
+    }, 180);
+  }
+
+  function flushSearchModeGridSync() {
+    if (searchModeRenderTimeout) {
+      window.clearTimeout(searchModeRenderTimeout);
+      searchModeRenderTimeout = 0;
+    }
+
+    applyFiltersAndRender();
   }
 
   function renderSearchModeResults() {
@@ -260,6 +280,15 @@
     return String(value ?? "").replace(/\s/g, "").length >= 2;
   }
 
+  function toggleFilterPanel() {
+    const toolbar = els.filterToggle?.closest(".side-toolbar");
+    if (!toolbar) return;
+
+    const isOpen = toolbar.classList.toggle("is-filters-open");
+    els.filterToggle.setAttribute("aria-expanded", String(isOpen));
+    els.filterToggle.setAttribute("aria-label", isOpen ? "Nascondi filtri" : "Mostra filtri");
+  }
+
   function bindEvents() {
     els.searchInput.addEventListener("focus", openSearchMode);
     els.searchInput.addEventListener("click", openSearchMode);
@@ -275,6 +304,10 @@
       if (event.target === els.searchMode) closeSearchMode();
     });
 
+    if (els.filterToggle) {
+      els.filterToggle.addEventListener("click", toggleFilterPanel);
+    }
+
 
     els.decadeFilter.addEventListener("change", () => {
       state.decade = els.decadeFilter.value;
@@ -288,21 +321,19 @@
       renderSearchModeResults();
     });
 
-    els.sortSelect.addEventListener("change", () => {
-      state.sort = els.sortSelect.value;
-      applyFiltersAndRender();
-      renderSearchModeResults();
-    });
 
     els.resetFilters.addEventListener("click", resetFilters);
     els.randomButton.addEventListener("click", openRandomSuggestion);
+    if (els.brandHome) els.brandHome.addEventListener("click", handleBackToTopClick);
     if (els.themeToggle) els.themeToggle.addEventListener("click", toggleTheme);
     if (els.backToTop) {
-      els.backToTop.addEventListener("click", scrollBackToTop);
+      els.backToTop.addEventListener("click", handleBackToTopClick);
       window.addEventListener("scroll", scheduleBackToTopVisibility, { passive: true });
       window.addEventListener("resize", scheduleBackToTopVisibility);
       updateBackToTopVisibility();
     }
+
+    window.addEventListener("resize", scheduleDialogTitleFitCheck);
 
     els.csvFileInput.addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
@@ -314,9 +345,10 @@
 
     els.closeDialog.addEventListener("click", closeDialog);
 
-    els.detailDialog.addEventListener("click", (event) => {
-      if (event.target === els.detailDialog) closeDialog();
-    });
+    // Richiesta mobile: il dettaglio deve chiudersi con qualunque tap/click,
+    // sia sul backdrop sia su qualsiasi punto dentro la tile.
+    els.detailDialog.addEventListener("click", closeDialog);
+    els.dialogContent.addEventListener("click", closeDialog);
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && els.detailDialog.open) {
@@ -340,15 +372,44 @@
 
   function updateBackToTopVisibility() {
     if (!els.backToTop) return;
-    const threshold = Math.min(900, Math.max(420, window.innerHeight * 0.75));
+    const threshold = Math.min(220, Math.max(110, window.innerHeight * 0.14));
     const shouldShow = getScrollTop() > threshold;
     els.backToTop.hidden = !shouldShow;
     els.backToTop.classList.toggle("is-visible", shouldShow);
   }
 
+  function handleBackToTopClick(event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    scrollBackToTop();
+  }
+
   function scrollBackToTop() {
-    const shouldReduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    scrollWindowTo(0, shouldReduceMotion ? 0 : 900, shouldReduceMotion, () => {
+    // La navigazione alfabetica forza sempre l'animazione.
+    // Facciamo lo stesso qui: altrimenti, con "riduci movimento" attivo nel sistema,
+    // Back to top e logo saltano istantaneamente mentre le lettere scorrono.
+    const shouldReduceMotion = false;
+    const currentTop = getScrollTop();
+    if (currentTop <= 1) {
+      setActiveAlphabetLink(null);
+      removeCatalogHashFromUrl();
+      return;
+    }
+
+    const links = [...(els.alphabetNav?.querySelectorAll("a[data-target]") ?? [])];
+    const firstAlphabetIndex = links.length ? 0 : -1;
+    const fromIndex = getActiveAlphabetIndex();
+    const duration = Math.round(Math.min(4200, Math.max(950, currentTop * 0.7, Math.abs(fromIndex - firstAlphabetIndex) * 170)));
+
+    if (firstAlphabetIndex >= 0) {
+      animateAlphabetTrail(fromIndex, firstAlphabetIndex, shouldReduceMotion, duration);
+    }
+
+    scrollWindowTo(0, duration, shouldReduceMotion, () => {
+      setActiveAlphabetLink(null);
       updateBackToTopVisibility();
       removeCatalogHashFromUrl();
     });
@@ -387,7 +448,6 @@
     state.decade = "all";
     state.section = "all";
     state.groupBy = DEFAULT_GROUP;
-    state.sort = "artist-az";
     state.lastRandomId = "";
 
     els.sourceName.textContent = sourceName;
@@ -558,7 +618,7 @@
       next = next.filter((record) => record.decade === state.decade);
     }
 
-    next.sort(getSorter(state.sort));
+    next.sort(getDefaultCatalogSorter());
     return next;
   }
 
@@ -678,70 +738,6 @@
     }
 
     return null;
-  }
-
-  function shouldUseArtistBlocks(group) {
-    return false;
-  }
-
-  function buildArtistClusters(records) {
-    const clusters = [];
-
-    records.forEach((record) => {
-      const artistName = clean(record.artista) || "Artista sconosciuto";
-      const artistKey = normalizeForSearch(artistName);
-      const current = clusters[clusters.length - 1];
-
-      if (!current || current.key !== artistKey) {
-        clusters.push({
-          key: artistKey,
-          artist: artistName,
-          items: [record]
-        });
-        return;
-      }
-
-      current.items.push(record);
-    });
-
-    return clusters;
-  }
-
-  function createArtistBlock(cluster) {
-    const block = document.createElement("section");
-    block.className = "artist-block";
-    block.dataset.artist = cluster.artist;
-    block.setAttribute("aria-label", `Dischi di ${cluster.artist}`);
-
-    const years = cluster.items
-      .map((record) => record.annoNumber)
-      .filter(Number.isFinite)
-      .sort((a, b) => a - b);
-    const yearLabel = years.length
-      ? years[0] === years[years.length - 1] ? String(years[0]) : `${years[0]}-${years[years.length - 1]}`
-      : "anni n.d.";
-    const discCount = cluster.items.reduce((sum, record) => sum + (record.dischi ?? 0), 0);
-    const albumLabel = `${numberFormatter.format(cluster.items.length)} ${cluster.items.length === 1 ? "album" : "album"}`;
-    const physicalLabel = discCount > 0 ? ` · ${numberFormatter.format(discCount)} ${discCount === 1 ? "disco fisico" : "dischi fisici"}` : "";
-
-    const header = document.createElement("header");
-    header.className = "artist-block-head";
-    header.innerHTML = `
-      <div class="artist-block-stamp" aria-hidden="true">Artist</div>
-      <div class="artist-block-copy">
-        <h3>${escapeHtml(cluster.artist)}</h3>
-        <p>${escapeHtml(albumLabel + physicalLabel)} · ${escapeHtml(yearLabel)}</p>
-      </div>
-    `;
-
-    const grid = document.createElement("div");
-    grid.className = "artist-block-grid";
-    cluster.items.forEach((record, index) => {
-      grid.append(createAlbumCard(record, { startsArtist: index === 0 }));
-    });
-
-    block.append(header, grid);
-    return block;
   }
 
   function shouldShowLetterSeparators(group) {
@@ -1521,7 +1517,6 @@
       </div>
     `;
 
-    setupCoverImages(button);
     button.addEventListener("click", () => openDetails(record));
     return button;
   }
@@ -1570,6 +1565,11 @@
 
     els.dialogContent.innerHTML = `
       <div class="dialog-layout">
+        <header class="dialog-title-panel">
+          <p class="eyebrow">${escapeHtml(eyebrow)}</p>
+          <h2 id="dialogTitle" class="dialog-title-static" title="${escapeHtml(record.titolo || "Senza titolo")}">${escapeHtml(record.titolo || "Senza titolo")}</h2>
+          <p class="dialog-artist">${escapeHtml(record.artista || "Artista sconosciuto")}</p>
+        </header>
         <div class="dialog-cover">
           <div class="dialog-cover-stage" data-cover-frame style="--tile-a: ${tileA}; --tile-b: ${tileB};" title="Cover attesa: ${escapeHtml(record.coverPath || "covers/artista_titolo.jpg")}">
             <img class="dialog-cover-img" data-cover-img data-cover-src="${escapeHtml(record.coverPath)}" alt="Copertina di ${escapeHtml(record.titolo || "Senza titolo")} - ${escapeHtml(record.artista || "Artista sconosciuto")}" decoding="async" />
@@ -1582,9 +1582,6 @@
           </div>
         </div>
         <div class="dialog-body">
-          <p class="eyebrow">${escapeHtml(eyebrow)}</p>
-          <h2 id="dialogTitle">${escapeHtml(record.titolo || "Senza titolo")}</h2>
-          <p class="dialog-artist">${escapeHtml(record.artista || "Artista sconosciuto")}</p>
           <div class="detail-tags">${tags}</div>
           <dl class="detail-list">
             ${detailItems.map(renderDetailItem).join("")}
@@ -1604,6 +1601,39 @@
       els.detailDialog.showModal();
     } else {
       els.detailDialog.setAttribute("open", "");
+    }
+
+    scheduleDialogTitleFitCheck();
+  }
+
+  function scheduleDialogTitleFitCheck() {
+    const checkSoon = () => {
+      checkDialogTitleFit();
+      window.requestAnimationFrame(checkDialogTitleFit);
+      window.setTimeout(checkDialogTitleFit, 180);
+    };
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(checkSoon);
+    });
+
+    if (document.fonts && typeof document.fonts.ready?.then === "function") {
+      document.fonts.ready.then(checkSoon).catch(() => {});
+    }
+  }
+
+  function checkDialogTitleFit() {
+    const title = els.dialogContent?.querySelector(".dialog-title-static");
+    if (!title) return;
+
+    title.classList.remove("is-long-title");
+
+    const styles = window.getComputedStyle(title);
+    const lineHeight = Number.parseFloat(styles.lineHeight) || title.offsetHeight || 1;
+    const isWrapped = title.scrollHeight > lineHeight * 1.35;
+
+    if (isWrapped) {
+      title.classList.add("is-long-title");
     }
   }
 
@@ -1630,7 +1660,6 @@
     state.section = "all";
     state.decade = "all";
     state.groupBy = DEFAULT_GROUP;
-    state.sort = "artist-az";
     state.lastRandomId = "";
     if (els.randomHint) els.randomHint.textContent = "Pesca un album casuale dai risultati visibili.";
     resetControlsOnly();
@@ -1643,7 +1672,6 @@
     els.searchInput.value = "";
     els.decadeFilter.value = "all";
     els.groupSelect.value = DEFAULT_GROUP;
-    els.sortSelect.value = "artist-az";
   }
 
   function showManualCsvFallback(error) {
@@ -1686,41 +1714,23 @@
     els.randomButton.disabled = state.filtered.length === 0;
   }
 
-  function getSorter(sortKey) {
-    const byArtist = (a, b) => localeSort(a.artista, b.artista) || compareYear(a, b, "desc") || localeSort(a.titolo, b.titolo);
-    const sorters = {
-      "artist-az": byArtist,
-      "title-az": (a, b) => localeSort(a.titolo, b.titolo) || localeSort(a.artista, b.artista),
-      "year-desc": (a, b) => compareYear(a, b, "desc") || byArtist(a, b),
-      "year-asc": (a, b) => compareYear(a, b, "asc") || byArtist(a, b)
-    };
-    return sorters[sortKey] ?? byArtist;
+  function getDefaultCatalogSorter() {
+    return (a, b) =>
+      localeSort(a.artista, b.artista) ||
+      compareYearDesc(a, b) ||
+      localeSort(a.titolo, b.titolo);
   }
 
-  function compareYear(a, b, direction) {
-    const left = a.annoNumber ?? (direction === "asc" ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY);
-    const right = b.annoNumber ?? (direction === "asc" ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY);
-    return direction === "asc" ? left - right : right - left;
-  }
-
-  function sortDecades(a, b) {
-    if (a === "Senza anno") return 1;
-    if (b === "Senza anno") return -1;
-    return Number(a) - Number(b);
+  function compareYearDesc(a, b) {
+    const left = a.annoNumber ?? Number.NEGATIVE_INFINITY;
+    const right = b.annoNumber ?? Number.NEGATIVE_INFINITY;
+    return right - left;
   }
 
   function sortDecadesDesc(a, b) {
     if (a === "Senza anno") return 1;
     if (b === "Senza anno") return -1;
     return Number(b) - Number(a);
-  }
-
-  function countBy(records, getter) {
-    return records.reduce((map, record) => {
-      const key = getter(record);
-      map.set(key, (map.get(key) ?? 0) + 1);
-      return map;
-    }, new Map());
   }
 
   function localeSort(a = "", b = "") {
