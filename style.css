@@ -2080,3 +2080,540 @@ body.is-search-mode {
     width: 92% !important;
   }
 }
+
+
+/* v18: polish pass - allineamento finale, spacing/token e componenti piu coerenti */
+:root {
+  --border-size: 2px;
+  --border-size-strong: 3px;
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 24px;
+  --control-height: 42px;
+  --control-radius: 999px;
+  --card-radius: 20px;
+  --tile-cover-size: 76px;
+  --tile-vinyl-size: 88px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-rendering: geometricPrecision;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+.album-card,
+.search-mode-panel,
+.dialog-inner {
+  font-synthesis-weight: none;
+}
+
+.brand,
+.side-toolbar-title,
+.catalog-heading,
+.search-mode-head,
+.search-mode-meta {
+  align-items: center;
+}
+
+.brand-mark,
+.theme-toggle-dot,
+.random-icon,
+.empty-icon,
+.alphabet-nav a,
+.close-button,
+.filter-toggle,
+.back-to-top,
+.remaster-badge {
+  flex: 0 0 auto;
+}
+
+.brand-home,
+.side-toolbar-title strong,
+.random-main,
+.catalog-heading h2,
+.group-copy h2,
+.search-mode-head h2,
+.dialog-title-static {
+  font-weight: 400;
+}
+
+.search-wrap,
+.search-mode-bar,
+select,
+.ghost-button,
+.file-picker,
+.theme-toggle,
+.random-button,
+.back-to-top {
+  min-height: var(--control-height);
+}
+
+.search-wrap,
+.search-mode-bar,
+select,
+.ghost-button,
+.file-picker,
+.theme-toggle,
+.back-to-top,
+.result-count,
+.group-count,
+.chip,
+.search-mode-clear {
+  border-radius: var(--control-radius);
+}
+
+.side-toolbar,
+.random-button,
+.sidebar-card,
+.stat-card,
+.status-box,
+.manual-csv-box,
+.empty-state,
+.album-card,
+.detail-item,
+.note-box,
+.search-mode-panel,
+.dialog-inner {
+  border-width: var(--border-size);
+}
+
+.hero,
+.group-separator,
+.dialog-cover-stage,
+.brand-mark,
+.search-mode-bar,
+.close-button,
+.filter-toggle {
+  border-width: var(--border-size-strong);
+}
+
+.side-toolbar,
+.random-button,
+.sidebar-card,
+.stat-card,
+.album-card,
+.detail-item,
+.note-box {
+  background: color-mix(in srgb, var(--card) 92%, var(--paper));
+}
+
+.eyebrow,
+.random-kicker,
+.filter-grid label > span,
+.stat-label,
+.detail-item dt {
+  color: color-mix(in srgb, var(--red) 82%, var(--ink));
+  font-family: var(--font-mono);
+  letter-spacing: .075em;
+}
+
+.filter-grid label > span,
+.stat-label,
+.detail-item dt {
+  text-transform: uppercase;
+}
+
+.search-wrap,
+select,
+.ghost-button,
+.file-picker,
+.search-mode-bar,
+.search-mode-clear {
+  border-width: var(--border-size);
+}
+
+.search-wrap input,
+.search-mode-bar input {
+  line-height: 1.2;
+}
+
+select,
+.ghost-button,
+.file-picker,
+.search-mode-clear {
+  font-family: var(--font-ui);
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.hero {
+  align-items: center;
+}
+
+.hero-copy {
+  align-self: center;
+}
+
+.hero-object {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+.hero-stripe {
+  left: 6%;
+  right: -12%;
+}
+
+.hero-disc {
+  right: 15%;
+  top: 50%;
+  transform: translateY(-52%);
+}
+
+.hero-label {
+  right: 8%;
+  bottom: 9%;
+}
+
+.hero-jp {
+  left: 9%;
+  top: 14%;
+}
+
+.stats-grid {
+  align-items: stretch;
+}
+
+.stat-card {
+  display: grid;
+  align-content: center;
+  min-height: 112px;
+}
+
+.album-grid {
+  align-items: stretch;
+}
+
+.album-card {
+  border-radius: var(--card-radius);
+  isolation: isolate;
+}
+
+.album-card:hover {
+  box-shadow: 8px 8px 0 color-mix(in srgb, var(--ink) 18%, transparent), 0 12px 28px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+
+.card-copy {
+  align-self: start;
+}
+
+.card-title {
+  font-family: var(--font-ui);
+  font-size: .98rem;
+  font-weight: 800;
+  line-height: 1.18;
+}
+
+.card-artist {
+  color: color-mix(in srgb, var(--ink) 66%, var(--muted));
+  font-family: var(--font-ui);
+  font-size: .88rem;
+  font-weight: 600;
+  line-height: 1.28;
+}
+
+.card-meta {
+  align-items: flex-end;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 4px 8px;
+  border-width: var(--border-size);
+  font-family: var(--font-ui);
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.card-art {
+  display: grid;
+  place-items: center;
+  justify-self: end;
+  width: 96px;
+  height: 106px;
+}
+
+.card-cover-sleeve {
+  right: 12px;
+  top: 50%;
+  width: var(--tile-cover-size);
+  height: var(--tile-cover-size);
+  transform: translateY(-50%) translateX(10px) rotate(2deg) scale(.95);
+}
+
+.album-card.has-cover .card-cover-sleeve,
+.album-card.has-cover .cover-overlay {
+  transform: translateY(-50%) translateX(0) rotate(-2deg) scale(1);
+}
+
+.card-cover-fallback {
+  right: -26px;
+  top: 50%;
+  width: var(--tile-vinyl-size);
+  height: var(--tile-vinyl-size);
+  transform: translateY(-50%);
+}
+
+.vinyl-disc {
+  width: var(--tile-vinyl-size);
+  height: var(--tile-vinyl-size);
+}
+
+.group-label-separator,
+.letter-separator {
+  min-height: 38px;
+}
+
+.group-label-separator {
+  letter-spacing: .04em !important;
+}
+
+.alphabet-nav a {
+  line-height: 1;
+}
+
+.search-mode-panel {
+  border-radius: 28px;
+}
+
+.search-mode-results .album-card {
+  min-height: 122px;
+}
+
+.dialog-inner {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--card) 96%, var(--paper)), var(--card));
+}
+
+.dialog-layout {
+  align-items: start;
+}
+
+.dialog-title-static,
+.dialog-title-static.is-long-title {
+  max-width: 100%;
+  color: var(--ink);
+}
+
+.dialog-cover {
+  justify-items: center;
+}
+
+.dialog-cover-stage {
+  margin-inline: auto;
+}
+
+.dialog-body {
+  align-self: start;
+}
+
+.detail-tags {
+  align-items: center;
+}
+
+.detail-item {
+  display: grid;
+  align-content: start;
+  min-height: 78px;
+}
+
+.detail-item dt {
+  color: color-mix(in srgb, var(--ink) 58%, var(--muted));
+}
+
+.note-box strong {
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .side-toolbar,
+:root[data-theme="dark"] .random-button,
+:root[data-theme="dark"] .sidebar-card,
+:root[data-theme="dark"] .stat-card,
+:root[data-theme="dark"] .album-card,
+:root[data-theme="dark"] .detail-item,
+:root[data-theme="dark"] .note-box,
+:root[data-theme="dark"] .search-mode-panel,
+:root[data-theme="dark"] .dialog-inner {
+  background-color: color-mix(in srgb, var(--card) 94%, var(--paper));
+}
+
+:root[data-theme="dark"] .eyebrow,
+:root[data-theme="dark"] .random-kicker,
+:root[data-theme="dark"] .filter-grid label > span,
+:root[data-theme="dark"] .stat-label,
+:root[data-theme="dark"] .detail-item dt {
+  color: color-mix(in srgb, var(--red) 76%, var(--ink));
+}
+
+@media (max-width: 1120px) {
+  .sidebar {
+    align-items: start;
+  }
+
+  .side-toolbar,
+  .random-button,
+  .sidebar-card {
+    align-self: stretch;
+  }
+
+  .hero-disc {
+    right: 12%;
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --control-height: 40px;
+    --card-radius: 16px;
+    --tile-cover-size: 72px;
+    --tile-vinyl-size: 78px;
+  }
+
+  .brand {
+    align-items: center;
+  }
+
+  .side-toolbar,
+  .stat-card,
+  .album-card,
+  .group-separator {
+    box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 13%, transparent);
+  }
+
+  .filter-panel {
+    will-change: max-height, opacity, transform;
+  }
+
+  .stats-grid {
+    align-items: stretch;
+  }
+
+  .stat-card {
+    min-height: 86px;
+  }
+
+  .album-card {
+    grid-template-rows: minmax(58px, auto) 102px;
+  }
+
+  .card-copy {
+    min-height: 58px;
+  }
+
+  .card-title {
+    font-size: .88rem;
+    line-height: 1.16;
+  }
+
+  .card-artist {
+    font-size: .76rem;
+    line-height: 1.2;
+  }
+
+  .card-art {
+    width: 100%;
+    height: 100px;
+    place-items: center;
+  }
+
+  .card-cover-sleeve {
+    right: 50%;
+    top: 50%;
+    width: var(--tile-cover-size);
+    height: var(--tile-cover-size);
+    transform: translate(50%, -50%) translateY(8px) rotate(2deg) scale(.95);
+  }
+
+  .album-card.has-cover .card-cover-sleeve,
+  .album-card.has-cover .cover-overlay {
+    transform: translate(50%, -50%) rotate(-2deg) scale(1);
+  }
+
+  .card-cover-fallback {
+    right: 50%;
+    top: 50%;
+    width: var(--tile-vinyl-size);
+    height: var(--tile-vinyl-size);
+    transform: translate(58%, -50%);
+  }
+
+  .vinyl-disc {
+    width: var(--tile-vinyl-size);
+    height: var(--tile-vinyl-size);
+  }
+
+  .card-meta {
+    padding-bottom: 7px;
+  }
+
+  .chip {
+    min-height: 21px;
+    padding: 3px 6px;
+    font-size: .61rem;
+  }
+
+  .search-mode-panel {
+    border-radius: 20px;
+  }
+
+  .search-mode-results .album-card {
+    min-height: 112px;
+  }
+
+  .dialog-layout {
+    gap: 14px !important;
+  }
+
+  .dialog-cover-stage {
+    margin-inline: auto;
+  }
+
+  .detail-item {
+    min-height: 66px;
+  }
+}
+
+@media (max-width: 420px) {
+  .album-grid {
+    gap: 8px;
+  }
+
+  .album-card {
+    grid-template-rows: minmax(62px, auto) 92px;
+  }
+
+  .card-copy {
+    min-height: 62px;
+  }
+
+  .card-art {
+    height: 92px;
+  }
+
+  .card-title {
+    font-size: .84rem;
+  }
+
+  .card-artist {
+    font-size: .72rem;
+  }
+
+  .chip {
+    font-size: .58rem;
+  }
+}
